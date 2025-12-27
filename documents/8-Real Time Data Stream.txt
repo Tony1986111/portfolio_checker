@@ -1,0 +1,438 @@
+Real Time Data Socket
+​
+Overview
+The Polymarket Real-Time Data Socket (RTDS) is a WebSocket-based streaming service that provides real-time updates for various Polymarket data streams. The service allows clients to subscribe to multiple data feeds simultaneously and receive live updates as events occur on the platform.
+Polymarket provides a Typescript client for interacting with this streaming service. Download and view it’s documentation here
+​
+Connection Details
+WebSocket URL: wss://ws-live-data.polymarket.com
+Protocol: WebSocket
+Data Format: JSON
+​
+Authentication
+The RTDS supports two types of authentication depending on the subscription type:
+CLOB Authentication: Required for certain trading-related subscriptions
+key: API key
+secret: API secret
+passphrase: API passphrase
+Gamma Authentication: Required for user-specific data
+address: User wallet address
+​
+Connection Management
+The WebSocket connection supports:
+Dynamic Subscriptions: Without disconnecting from the socket users can add, remove and modify topics and filters they are subscribed to.
+Ping/Pong: You should send PING messages (every 5 seconds ideally) to maintain connection
+​
+Available Subscription Types
+Although this connection technically supports additional activity and subscription types, they are not fully supported at this time. Users are free to use them but there may be some unexpected behavior.
+The RTDS currently supports the following subscription types:
+Crypto Prices - Real-time cryptocurrency price updates
+Comments - Comment-related events including reactions
+​
+Message Structure
+All messages received from the WebSocket follow this structure:
+{
+  "topic": "string",
+  "type": "string", 
+  "timestamp": "number",
+  "payload": "object"
+}
+topic: The subscription topic (e.g., “crypto_prices”, “comments”, “activity”)
+type: The message type/event (e.g., “update”, “reaction_created”, “orders_matched”)
+timestamp: Unix timestamp in milliseconds
+payload: Event-specific data object
+​
+Subscription Management
+​
+Subscribe to Topics
+To subscribe to data streams, send a JSON message with this structure:
+
+{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "topic_name",
+      "type": "message_type",
+      "filters": "optional_filter_string",
+      "clob_auth": {
+        "key": "api_key",
+        "secret": "api_secret", 
+        "passphrase": "api_passphrase"
+      },
+      "gamma_auth": {
+        "address": "wallet_address"
+      }
+    }
+  ]
+}
+
+Unsubscribe from Topics
+To unsubscribe from data streams, send a similar message with "action": "unsubscribe".
+​
+Error Handling
+Connection errors will trigger automatic reconnection attempts
+Invalid subscription messages may result in connection closure
+Authentication failures will prevent successful subscription to protected topics
+
+
+
+RTDS Crypto Prices
+Polymarket provides a Typescript client for interacting with this streaming service. Download and view it’s documentation here
+​
+Overview
+The crypto prices subscription provides real-time updates for cryptocurrency price data from two different sources:
+Binance Source (crypto_prices): Real-time price data from Binance exchange
+Chainlink Source (crypto_prices_chainlink): Price data from Chainlink oracle networks
+Both streams deliver current market prices for various cryptocurrency trading pairs, but use different symbol formats and subscription structures.
+​
+Binance Source (crypto_prices)
+​
+Subscription Details
+Topic: crypto_prices
+Type: update
+Authentication: Not required
+Filters: Optional (specific symbols can be filtered)
+Symbol Format: Lowercase concatenated pairs (e.g., solusdt, btcusdt)
+​
+Subscription Message
+{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "crypto_prices",
+      "type": "update"
+    }
+  ]
+}
+
+With Symbol Filter
+To subscribe to specific cryptocurrency symbols, include a filters parameter:
+{
+  "action": "subscribe", 
+  "subscriptions": [
+    {
+      "topic": "crypto_prices",
+      "type": "update",
+      "filters": "solusdt,btcusdt,ethusdt"
+    }
+  ]
+}
+
+Chainlink Source (crypto_prices_chainlink)
+​
+Subscription Details
+Topic: crypto_prices_chainlink
+Type: * (all types)
+Authentication: Not required
+Filters: Optional (JSON object with symbol specification)
+Symbol Format: Slash-separated pairs (e.g., eth/usd, btc/usd)
+​
+Subscription Message
+{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "crypto_prices_chainlink",
+      "type": "*",
+      "filters": ""
+    }
+  ]
+}
+
+
+With Symbol Filter
+To subscribe to specific cryptocurrency symbols, include a JSON filters parameter:
+{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "crypto_prices_chainlink",
+      "type": "*",
+      "filters": "{\"symbol\":\"eth/usd\"}"
+    }
+  ]
+}
+
+
+Message Format
+​
+Binance Source Message Format
+When subscribed to Binance crypto prices (crypto_prices), you’ll receive messages with the following structure:
+{
+  "topic": "crypto_prices",
+  "type": "update", 
+  "timestamp": 1753314064237,
+  "payload": {
+    "symbol": "solusdt",
+    "timestamp": 1753314064213,
+    "value": 189.55
+  }
+}
+​
+Chainlink Source Message Format
+When subscribed to Chainlink crypto prices (crypto_prices_chainlink), you’ll receive messages with the following structure:
+{
+  "topic": "crypto_prices_chainlink",
+  "type": "update", 
+  "timestamp": 1753314064237,
+  "payload": {
+    "symbol": "eth/usd",
+    "timestamp": 1753314064213,
+    "value": 3456.78
+  }
+}
+​
+Payload Fields
+Field	Type	Description
+symbol	string	Trading pair symbol
+Binance: lowercase concatenated (e.g., “solusdt”, “btcusdt”)
+Chainlink: slash-separated (e.g., “eth/usd”, “btc/usd”)
+timestamp	number	Price timestamp in Unix milliseconds
+value	number	Current price value in the quote currency
+​
+Example Messages
+​
+Binance Source Examples
+​
+Solana Price Update (Binance)
+{
+  "topic": "crypto_prices",
+  "type": "update",
+  "timestamp": 1753314064237,
+  "payload": {
+    "symbol": "solusdt", 
+    "timestamp": 1753314064213,
+    "value": 189.55
+  }
+}
+​
+Bitcoin Price Update (Binance)
+{
+  "topic": "crypto_prices",
+  "type": "update", 
+  "timestamp": 1753314088421,
+  "payload": {
+    "symbol": "btcusdt",
+    "timestamp": 1753314088395,
+    "value": 67234.50
+  }
+}
+​
+Chainlink Source Examples
+​
+Ethereum Price Update (Chainlink)
+{
+  "topic": "crypto_prices_chainlink",
+  "type": "update",
+  "timestamp": 1753314064237,
+  "payload": {
+    "symbol": "eth/usd", 
+    "timestamp": 1753314064213,
+    "value": 3456.78
+  }
+}
+​
+Bitcoin Price Update (Chainlink)
+{
+  "topic": "crypto_prices_chainlink",
+  "type": "update", 
+  "timestamp": 1753314088421,
+  "payload": {
+    "symbol": "btc/usd",
+    "timestamp": 1753314088395,
+    "value": 67234.50
+  }
+}
+​
+Supported Symbols
+​
+Binance Source Symbols
+The Binance source supports various cryptocurrency trading pairs using lowercase concatenated format:
+btcusdt - Bitcoin to USDT
+ethusdt - Ethereum to USDT
+solusdt - Solana to USDT
+xrpusdt - XRP to USDT
+​
+Chainlink Source Symbols
+The Chainlink source supports cryptocurrency trading pairs using slash-separated format:
+btc/usd - Bitcoin to USD
+eth/usd - Ethereum to USD
+sol/usd - Solana to USD
+xrp/usd - XRP to USD
+​
+Notes
+​
+General
+Price updates are sent as market prices change
+The timestamp in the payload represents when the price was recorded
+The outer timestamp represents when the message was sent via WebSocket
+No authentication is required for crypto price data
+
+
+
+
+RTDS Comments
+Polymarket provides a Typescript client for interacting with this streaming service. Download and view it’s documentation here
+​
+Overview
+The comments subscription provides real-time updates for comment-related events on the Polymarket platform. This includes new comments being created, as well as other comment interactions like reactions and replies.
+​
+Subscription Details
+Topic: comments
+Type: comment_created (and potentially other comment event types like reaction_created)
+Authentication: May require Gamma authentication for user-specific data
+Filters: Optional (can filter by specific comment IDs, users, or events)
+​
+Subscription Message
+{
+  "action": "subscribe",
+  "subscriptions": [
+    {
+      "topic": "comments", 
+      "type": "comment_created"
+    }
+  ]
+}
+​
+Message Format
+When subscribed to comments, you’ll receive messages with the following structure:
+{
+  "topic": "comments",
+  "type": "comment_created",
+  "timestamp": 1753454975808,
+  "payload": {
+    "body": "do you know what the term encircle means? it means to surround from all sides, Russia has present on only 1 side, that's the opposite of an encirclement",
+    "createdAt": "2025-07-25T14:49:35.801298Z",
+    "id": "1763355",
+    "parentCommentID": "1763325",
+    "parentEntityID": 18396,
+    "parentEntityType": "Event",
+    "profile": {
+      "baseAddress": "0xce533188d53a16ed580fd5121dedf166d3482677",
+      "displayUsernamePublic": true,
+      "name": "salted.caramel",
+      "proxyWallet": "0x4ca749dcfa93c87e5ee23e2d21ff4422c7a4c1ee",
+      "pseudonym": "Adored-Disparity"
+    },
+    "reactionCount": 0,
+    "replyAddress": "0x0bda5d16f76cd1d3485bcc7a44bc6fa7db004cdd",
+    "reportCount": 0,
+    "userAddress": "0xce533188d53a16ed580fd5121dedf166d3482677"
+  }
+}
+​
+Message Types
+​
+comment_created
+Triggered when a user creates a new comment on an event or in reply to another comment.
+​
+comment_removed
+Triggered when a comment is removed or deleted.
+​
+reaction_created
+Triggered when a user adds a reaction to an existing comment.
+​
+reaction_removed
+Triggered when a reaction is removed from a comment.
+​
+Payload Fields
+Field	Type	Description
+body	string	The text content of the comment
+createdAt	string	ISO 8601 timestamp when the comment was created
+id	string	Unique identifier for this comment
+parentCommentID	string	ID of the parent comment if this is a reply (null for top-level comments)
+parentEntityID	number	ID of the parent entity (event, market, etc.)
+parentEntityType	string	Type of parent entity (e.g., “Event”, “Market”)
+profile	object	Profile information of the user who created the comment
+reactionCount	number	Current number of reactions on this comment
+replyAddress	string	Polygon address for replies (may be different from userAddress)
+reportCount	number	Current number of reports on this comment
+userAddress	string	Polygon address of the user who created the comment
+​
+Profile Object Fields
+Field	Type	Description
+baseAddress	string	User profile address
+displayUsernamePublic	boolean	Whether the username should be displayed publicly
+name	string	User’s display name
+proxyWallet	string	Proxy wallet address used for transactions
+pseudonym	string	Generated pseudonym for the user
+​
+Parent Entity Types
+The following parent entity types are supported:
+Event - Comments on prediction events
+Market - Comments on specific markets
+Additional entity types may be available
+​
+Example Messages
+​
+New Comment Created
+{
+  "topic": "comments",
+  "type": "comment_created",
+  "timestamp": 1753454975808,
+  "payload": {
+    "body": "do you know what the term encircle means? it means to surround from all sides, Russia has present on only 1 side, that's the opposite of an encirclement",
+    "createdAt": "2025-07-25T14:49:35.801298Z",
+    "id": "1763355",
+    "parentCommentID": "1763325",
+    "parentEntityID": 18396,
+    "parentEntityType": "Event",
+    "profile": {
+      "baseAddress": "0xce533188d53a16ed580fd5121dedf166d3482677",
+      "displayUsernamePublic": true,
+      "name": "salted.caramel",
+      "proxyWallet": "0x4ca749dcfa93c87e5ee23e2d21ff4422c7a4c1ee",
+      "pseudonym": "Adored-Disparity"
+    },
+    "reactionCount": 0,
+    "replyAddress": "0x0bda5d16f76cd1d3485bcc7a44bc6fa7db004cdd",
+    "reportCount": 0,
+    "userAddress": "0xce533188d53a16ed580fd5121dedf166d3482677"
+  }
+}
+​
+Reply to Existing Comment
+{
+  "topic": "comments",
+  "type": "comment_created",
+  "timestamp": 1753454985123,
+  "payload": {
+    "body": "That's a good point about the definition of encirclement.",
+    "createdAt": "2025-07-25T14:49:45.120000Z",
+    "id": "1763356",
+    "parentCommentID": "1763355",
+    "parentEntityID": 18396,
+    "parentEntityType": "Event",
+    "profile": {
+      "baseAddress": "0x1234567890abcdef1234567890abcdef12345678",
+      "displayUsernamePublic": true,
+      "name": "trader",
+      "proxyWallet": "0x9876543210fedcba9876543210fedcba98765432",
+      "pseudonym": "Bright-Analysis"
+    },
+    "reactionCount": 0,
+    "replyAddress": "0x0bda5d16f76cd1d3485bcc7a44bc6fa7db004cdd",
+    "reportCount": 0,
+    "userAddress": "0x1234567890abcdef1234567890abcdef12345678"
+  }
+}
+​
+Comment Hierarchy
+Comments support nested threading:
+Top-level comments: parentCommentID is null or empty
+Reply comments: parentCommentID contains the ID of the parent comment
+All comments are associated with a parentEntityID and parentEntityType
+​
+Use Cases
+Real-time comment feed displays
+Discussion thread monitoring
+Community sentiment analysis
+​
+Content
+Comments include reactionCount and reportCount
+Comment body contains the full text content
+​
+Notes
+The createdAt timestamp uses ISO 8601 format with timezone information
+The outer timestamp field represents when the WebSocket message was sent
+User profiles include both primary addresses and proxy wallet addresses

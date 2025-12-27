@@ -1,0 +1,255 @@
+# Developer Quickstart
+
+# Developer Quickstart
+
+This section of the documentation will provide all the essential resources to help you perform basic trading actions on the Polymarket platform. If you're just getting started, you're in the right place.
+Everything you need to start building with the Polymarket API is right here. Let's get started.
+
+
+## Developer Quickstart
+
+## Your First Order
+
+Placing your first order using one of our two Clients is relatively straightforward.
+For Python: pip install py-clob-client.
+For Typescript: npm install polymarket/clob-client & npm install ethers.
+After installing one of those you will be able to run the below code. Take the time to fill in the constants at the top and ensure you're using the proper signature type based on your login method.
+Many additional examples for the Typescript and Python clients are available here(TS) and here(Python) .
+
+### Python First Trade
+
+### Typescript First Trade
+
+```python
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import OrderArgs, OrderType
+from py_clob_client.order_builder.constants import BUY
+
+host: str = "https://clob.polymarket.com"
+key: str = "" #This is your Private Key. Export from https://reveal.magic.link/polymarket or from your Web3 Extension
+chain_id: int = 137 #No need to adjust this
+POLYMARKET_PROXY_ADDRESS: str = '' #This is the address listed below your profile picture when using the Polymarket site.
+
+#Select from the following 3 initialization options to match your login method, and remove any unused lines so only one client is initialized.
+
+
+### Initialization of a client using a Polymarket Proxy associated with an Email/Magic account. If you login with your email use this example.
+client = ClobClient(host, key=key, chain_id=chain_id, signature_type=1, funder=POLYMARKET_PROXY_ADDRESS)
+
+### Initialization of a client using a Polymarket Proxy associated with a Browser Wallet(Metamask, Coinbase Wallet, etc)
+client = ClobClient(host, key=key, chain_id=chain_id, signature_type=2, funder=POLYMARKET_PROXY_ADDRESS)
+
+### Initialization of a client that trades directly from an EOA. (If you don't know what this means, you're not using it)
+client = ClobClient(host, key=key, chain_id=chain_id)
+
+## Create and sign a limit order buying 5 tokens for 0.010c each
+#Refer to the API documentation to locate a tokenID: https://docs.polymarket.com/developers/gamma-markets-api/fetch-markets-guide
+
+client.set_api_creds(client.create_or_derive_api_creds()) 
+
+order_args = OrderArgs(
+    price=0.01,
+    size=5.0,
+    side=BUY,
+    token_id="", #Token ID you want to purchase goes here. Example token: 114304586861386186441621124384163963092522056897081085884483958561365015034812 ( Xi Jinping out in 2025, YES side )
+)
+signed_order = client.create_order(order_args)
+
+## GTC(Good-Till-Cancelled) Order
+resp = client.post_order(signed_order, OrderType.GTC)
+print(resp)
+```
+
+See all 38 lines
+​
+In addition to detailed comments in the code snippet, here are some more tips to help you get started.
+See the Python example for details on the proper way to initialize a Py-Clob-Client depending on your wallet type. Three exhaustive examples are given. If using a MetaMask wallet or EOA please see the resources here, for instructions on setting allowances.
+When buying into a market you purchase a "Token" that token represents either a Yes or No outcome of the event. To easily get required token pairs for a given event we have provided an interactive endpoint here.
+Common pitfalls:
+- Negrisk Markets require an additional flag in the OrderArgs negrisk=False
+- invalid signature error, likely due to one of the following.
+- Incorrect Funder and or Private Key
+- Incorrect NegRisk flag in your order arguments
+- not enough balance / allowance.
+- Not enough USDC to perform the trade. See the formula at the bottom of this page for details.
+- If using Metamask / WEB3 wallet go here, for instructions on setting allowances.
+## Developer Quickstart
+
+## Glossary
+
+# Developer Quickstart
+
+## Glossary
+
+| Term | Definition |
+|------|------------|
+| Token | A token represents a stake in a specific Yes/No outcome in a Market. The price of a token can fluctuate between 0−0 -0−1 based on the market belief in the outcome. When a market resolves, the token associated with the correct prediction can be redeemed for $1 USDC. This is also sometimes called an Asset Id |
+| Market | A single event outcome. Corresponds to a pair of CLOB token IDs(Yes/No), a market address, a question ID and a condition ID. |
+| Event | A collection of related markets grouped under a common topic or theme. |
+| SLUG | A human readable identification for a market or event. Can be found in the URL of any Polymarket Market or Event. You can use this slug to find more detailed information about a market or event by using it as a parameter in the Get Events or Get Markets endpoints. |
+| Negative Risk (negrisk) | A group of Markets(Event) in which only one Market can resolve as yes. For more detail see Negrisk Details |
+| Central Limit Order Book | The off-chain order matching system. This is where you place resting orders and market orders are matched with existing orders before being sent on-chain. |
+| Polygon Network | A scalable, multi-chain blockchain platform used by Polymarket to facilitate on-chain activities(contract creation, token transfers, etc) |
+## Your First Order
+
+## API Rate Limits
+
+
+# Developer Quickstart
+
+## API Rate Limits
+
+​
+### How Rate Limiting Works
+
+All rate limits are enforced using Cloudflare's throttling system. When you exceed the maximum configured rate for any endpoint, requests are throttled rather than immediately rejected. This means:
+- Throttling: Requests over the limit are delayed/queued rather than dropped
+- Burst Allowances: Some endpoints allow short bursts above the sustained rate
+- Time Windows: Limits reset based on sliding time windows (e.g., per 10 seconds, per minute)
+
+​
+### General Rate Limits
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| General Rate Limiting | 5000 requests / 10s | Throttle requests over the maximum configured rate |
+| "OK" Endpoint | 50 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+### Data API Rate Limits
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| Data API (General) | 200 requests / 10s | Throttle requests over the maximum configured rate |
+| Data API (Alternative) | 1200 requests / 1 minute | 10 minutes block on violation |
+| Data API /trades | 75 requests / 10s | Throttle requests over the maximum configured rate |
+| Data API "OK" Endpoint | 10 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+### GAMMA API Rate Limits
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| GAMMA (General) | 750 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA Get Comments | 100 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA /events | 100 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA /markets | 125 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA /markets /events listing | 100 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA Tags | 100 requests / 10s | Throttle requests over the maximum configured rate |
+| GAMMA Search | 300 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+### CLOB API Rate Limits
+
+​
+#### General CLOB Endpoints
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB (General) | 5000 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB GET Balance Allowance | 125 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB UPDATE Balance Allowance | 20 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+#### CLOB Market Data
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB /book | 200 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /books | 80 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /price | 200 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /prices | 80 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /midprice | 200 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /midprices | 80 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+#### CLOB Ledger Endpoints
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB Ledger (/trades /orders /notifications /order) | 300 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB Ledger /data/orders | 150 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB Ledger /data/trades | 150 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /notifications | 125 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+#### CLOB Markets & Pricing
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB Price History | 100 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB Markets | 250 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB Market Tick Size | 50 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB markets/0x | 50 requests / 10s | Throttle requests over the maximum configured rate |
+| CLOB /markets listing | 100 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+#### CLOB Authentication
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB API Keys | 50 requests / 10s | Throttle requests over the maximum configured rate |
+
+​
+#### CLOB Trading Endpoints
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| CLOB POST /order | 2400 requests / 10s (240/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB POST /order | 24000 requests / 10 minutes (40/s) | Throttle requests over the maximum configured rate |
+| CLOB DELETE /order | 2400 requests / 10s (240/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB DELETE /order | 24000 requests / 10 minutes (40/s) | Throttle requests over the maximum configured rate |
+| CLOB POST /orders | 800 requests / 10s (80/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB POST /orders | 12000 requests / 10 minutes (20/s) | Throttle requests over the maximum configured rate |
+| CLOB DELETE /orders | 800 requests / 10s (80/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB DELETE /orders | 12000 requests / 10 minutes (20/s) | Throttle requests over the maximum configured rate |
+| CLOB DELETE /cancel-all | 200 requests / 10s (20/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB DELETE /cancel-all | 3000 requests / 10 minutes (5/s) | Throttle requests over the maximum configured rate |
+| CLOB DELETE /cancel-market-orders | 800 requests / 10s (80/s) | BURST - Throttle requests over the maximum configured rate |
+| CLOB DELETE /cancel-market-orders | 12000 requests / 10 minutes (20/s) | Throttle requests over the maximum configured rate |
+
+​
+### Other API Rate Limits
+
+| Endpoint | Limit | Notes |
+|----------|-------|-------|
+| RELAYER /submit | 15 requests / 1 minute | Throttle requests over the maximum configured rate |
+| User PNL API | 100 requests / 10s | Throttle requests over the maximum configured rate |
+## Glossary
+
+## Endpoints
+
+Ask a question...
+
+
+
+# Developer Quickstart
+
+## Endpoints
+
+​
+### REST
+
+Used for all CLOB REST endpoints, denoted {clob-endpoint}.
+https://clob.polymarket.com/
+
+​
+### Data-API
+
+An additional endpoint that delivers user data, holdings, and other on-chain activities. https://data-api.polymarket.com/
+
+​
+### WebSocket
+
+Used for all CLOB WSS endpoints, denoted {wss-channel}.
+wss://ws-subscriptions-clob.polymarket.com/ws/
+
+​
+### Real Time Data Socket (RTDS)
+
+Used for real-time data streaming including crypto prices and comments, denoted {rtds-endpoint}.
+wss://ws-live-data.polymarket.com
+## API Rate Limits
+
+## Builder Program Introduction
+

@@ -1,0 +1,45 @@
+
+
+
+
+
+
+
+./start_react.sh
+
+source .env
+
+
+source venv/bin/activate 
+python claim_all_wallets.py
+
+
+
+
+
+
+启用txt自动换行：
+Option + Z
+
+浏览器打开console：
+option+command+J
+
+快速打开md格式
+Cmd+Shift+V
+
+
+
+
+
+
+
+
+帮我在根目录新建一个启动脚本start_react.sh。它需要：
+
+1. 先检查有没有这个项目的前后端的相关进程在运行中，如果有，先关闭（注意，只检查这个项目相关的进程，一定不能影响其它项目的进程）。
+
+2. 确认没有该项目的任何进程在运行后，启动前后端。
+
+3. 持续在终端输出前后端的log
+
+4. 可以通过ctrl+c在终端同时关闭前后端的进程。

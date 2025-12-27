@@ -1,0 +1,13 @@
+Liquidity Rewards
+Polymarket provides incentives aimed at catalyzing the supply and demand side of the marketplace. Specifically there is a public liquidity rewards program as well as one-off public pnl/volume competitions.
+
+​
+Overview
+By posting resting limit orders, liquidity providers (makers) are automatically eligible for Polymarket’s incentive program. The overall goal of this program is to catalyze a healthy, liquid marketplace. We can further define this as creating incentives that:
+Catalyze liquidity across all markets
+Encourage liquidity throughout a market’s entire lifecycle
+Motivate passive, balanced quoting tight to a market’s mid-point
+Encourages trading activity
+Discourages blatantly exploitative behaviors
+This program is heavily inspired by dYdX’s liquidity provider rewards which you can read more about here. In fact, the incentive methodology is essentially a copy of dYdX’s successful methodology but with some adjustments including specific adaptations for binary contract markets with distinct books, no staking mechanic a slightly modified order utility-relative depth function and reward amounts isolated per market. Rewards are distributed directly to the maker’s addresses daily at midnight UTC.
+​
