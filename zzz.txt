@@ -34,12 +34,13 @@ Cmd+Shift+V
 
 
 
-帮我在根目录新建一个启动脚本start_react.sh。它需要：
+1. rust_live_sport
+2. filter_bot
+3. full_bot
+4. one_cent
+5. portfolio_checker
+6. rust_other_sport
 
-1. 先检查有没有这个项目的前后端的相关进程在运行中，如果有，先关闭（注意，只检查这个项目相关的进程，一定不能影响其它项目的进程）。
 
-2. 确认没有该项目的任何进程在运行后，启动前后端。
-
-3. 持续在终端输出前后端的log
-
-4. 可以通过ctrl+c在终端同时关闭前后端的进程。
+alchemy_API_Key=g9dAhqU2UcudDYm-SCgq9WtnqZNjci7D
+Infura_API_KEY=163d21e910484ad8833cb68ce5b54b66
