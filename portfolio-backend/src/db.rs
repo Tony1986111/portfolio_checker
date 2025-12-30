@@ -15,8 +15,9 @@ pub struct PortfolioSnapshot {
 }
 
 pub async fn create_pool() -> Result<MySqlPool, AppError> {
-    let database_url = "mysql://root@localhost/portfolio_checker";
-    MySqlPool::connect(database_url)
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "mysql://root@localhost/portfolio_checker".to_string());
+    MySqlPool::connect(&database_url)
         .await
         .map_err(|e| AppError::DbError(format!("连接数据库失败: {}", e)))
 }

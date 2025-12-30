@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTheme } from 'next-themes'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-const API_BASE = 'http://localhost:8405'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8405'
 
 // 硬编码钱包名字
 const WALLET_NAMES: Record<string, string> = {

@@ -70,10 +70,11 @@ async fn main() {
         .layer(cors)
         .with_state(state);
 
-    let addr = "0.0.0.0:8405";
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8405".to_string());
+    let addr = format!("0.0.0.0:{}", port);
     tracing::info!("后端服务启动在 http://{}", addr);
     
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
