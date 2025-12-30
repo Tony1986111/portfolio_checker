@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
 # 复制依赖文件
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 
 # 创建虚拟 src 来缓存依赖
 RUN mkdir src && echo "fn main() {}" > src/main.rs
