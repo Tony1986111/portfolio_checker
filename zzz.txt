@@ -6,3 +6,37 @@
 
 
 ./start_react.sh
+
+source .env
+
+
+source venv/bin/activate 
+python claim_all_wallets.py
+
+
+
+
+
+
+启用txt自动换行：
+Option + Z
+
+浏览器打开console：
+option+command+J
+
+快速打开md格式
+Cmd+Shift+V
+
+
+
+
+
+
+
+
+1. rust_live_sport
+2. filter_bot
+3. full_bot
+4. one_cent
+5. portfolio_checker
+6. rust_other_sport
