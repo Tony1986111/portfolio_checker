@@ -59,7 +59,7 @@ impl PortfolioService {
 
     async fn get_usdc_balance(&self, proxy_address: &str) -> Result<f64, AppError> {
         let provider = ProviderBuilder::new()
-            .on_http(POLYGON_RPC.parse().unwrap());
+            .connect_http(POLYGON_RPC.parse().unwrap());
 
         let usdc_addr: Address = USDC_ADDRESS.parse()
             .map_err(|e| AppError::ParseError(format!("{}", e)))?;
@@ -69,11 +69,10 @@ impl PortfolioService {
 
         let contract = IERC20::new(usdc_addr, &provider);
         
-        let result: alloy::primitives::U256 = contract.balanceOf(wallet_addr)
+        let result = contract.balanceOf(wallet_addr)
             .call()
             .await
-            .map_err(|e| AppError::RpcError(format!("{}", e)))?
-            ._0;
+            .map_err(|e| AppError::RpcError(format!("{}", e)))?;
 
         // USDC有6位小数
         let balance_f64 = result.to_string().parse::<f64>().unwrap_or(0.0) / 1_000_000.0;
