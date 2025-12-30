@@ -7,8 +7,8 @@
 
 ./start_react.sh
 
-source .env
 
+source .env
 
 source venv/bin/activate 
 python claim_all_wallets.py
@@ -40,3 +40,60 @@ Cmd+Shift+V
 4. one_cent
 5. portfolio_checker
 6. rust_other_sport
+
+
+
+
+Railway 部署步骤（新手友好版）
+第一步：准备工作
+确保你的代码已经推送到 GitHub
+访问 railway.app 并用 GitHub 登录
+
+第二步：创建项目和数据库
+点击 "New Project"
+选择 "Provision MySQL" 先创建数据库
+点击创建好的 MySQL 服务 → Variables 标签 → 复制 MYSQL_URL 的值（后面要用）
+第三步：创建数据库表
+在 MySQL 服务中，点击 "Data" 标签
+运行以下 SQL 创建表：
+CREATE DATABASE IF NOT EXISTS railway;
+USE railway;
+
+CREATE TABLE portfolio_snapshots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp DATETIME NOT NULL,
+    proxy_address VARCHAR(255) NOT NULL,
+    portfolio_total DECIMAL(20, 6) NOT NULL,
+    usdc_balance DECIMAL(20, 6) NOT NULL,
+    positions_value DECIMAL(20, 6) NOT NULL,
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_proxy_address (proxy_address)
+);
+第四步：部署后端
+在同一个项目中，点击 "+ New" → "GitHub Repo"
+选择你的仓库
+Railway 会问你部署哪个目录，选择 portfolio-backend
+部署后，进入这个服务的 Settings：
+Root Directory: portfolio-backend
+进入 Variables 标签，添加：
+DATABASE_URL = 你之前复制的 MySQL URL
+还有你 .env 文件里的其他变量（钱包配置等）
+等待部署完成，点击服务会看到一个 URL，类似 https://xxx.railway.app，复制这个 URL
+第五步：部署前端
+再次点击 "+ New" → "GitHub Repo"
+选择同一个仓库
+选择目录 portfolio-frontend
+进入 Settings：
+Root Directory: portfolio-frontend
+进入 Variables 标签，添加：
+NEXT_PUBLIC_API_URL = 后端的 URL（第四步复制的那个）
+等待部署完成
+第六步：访问你的网站
+前端部署完成后，点击前端服务会看到一个 URL，打开就是你的网站了！
+
+
+
+
+
+
+mysql://root:AbpwagxDrBYXvGccZNSdQwKiaBGMIgSZ@mysql.railway.internal:3306/railway
