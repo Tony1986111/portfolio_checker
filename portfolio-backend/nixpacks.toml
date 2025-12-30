@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["rustc", "cargo", "gcc", "openssl", "pkg-config"]
+
+[phases.build]
+cmds = ["cargo build --release"]
+
+[start]
+cmd = "./target/release/portfolio_backend"
