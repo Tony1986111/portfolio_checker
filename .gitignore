@@ -82,3 +82,6 @@ Thumbs.db
 *.tmp
 *.swp
 *.bak
+
+# Keep the project SQLite database under version control.
+!portfolio-backend/portfolio_checker.db
