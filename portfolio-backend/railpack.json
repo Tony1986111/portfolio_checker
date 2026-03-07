@@ -1,7 +1,0 @@
-{
-  "$schema": "https://schema.railpack.com",
-  "provider": "rust",
-  "deploy": {
-    "startCommand": "./target/release/portfolio_backend"
-  }
-}

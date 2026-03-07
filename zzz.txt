@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 ./start_react.sh
 
 
@@ -12,8 +6,6 @@ source .env
 
 source venv/bin/activate 
 python claim_all_wallets.py
-
-
 
 
 
@@ -27,73 +19,57 @@ option+command+J
 快速打开md格式
 Cmd+Shift+V
 
+Screenshot on MacOS
+cmd+shift+4
+
+paste Screenshot
+Ctrl+V
 
 
 
 
+方案1：Vercel（前端）+ Railway（后端）- 最简单
+Railway 的优势：
+
+不需要 Docker！直接识别 Rust 项目自动构建
+有免费额度（$5/月试用额度）
+自动 HTTPS
+支持 SQLite 持久化存储
+Web 界面操作，不需要命令行
+Vercel 的优势：
+
+Next.js 官方平台，零配置
+完全免费（个人项目）
+自动 HTTPS 和 CDN
 
 
 
-1. rust_live_sport
-2. filter_bot
-3. full_bot
-4. one_cent
-5. portfolio_checker
-6. rust_other_sport
+# 体育钱包
+WALLET_1_PROXY_ADDRESS=0x17E5540881D89eEed7EC62B40720a76FFAffF205
 
+# ETH
+WALLET_2_PROXY_ADDRESS=0x46e85d21494258e65605a98cf8cd27dc8ad6269f
 
+# BTC
+WALLET_3_PROXY_ADDRESS=0xa47C1D54B710850C0B9e79eA7D6FF426284114C9
 
+# Solana
+WALLET_4_PROXY_ADDRESS=0x405303C9fbc7E7013C96541Aa281C0b51960f078
 
-Railway 部署步骤（新手友好版）
-第一步：准备工作
-确保你的代码已经推送到 GitHub
-访问 railway.app 并用 GitHub 登录
+# XRP
+WALLET_5_PROXY_ADDRESS=0xfAB1e69e479F041c75c1FA015778b69D3b571018
 
-第二步：创建项目和数据库
-点击 "New Project"
-选择 "Provision MySQL" 先创建数据库
-点击创建好的 MySQL 服务 → Variables 标签 → 复制 MYSQL_URL 的值（后面要用）
-第三步：创建数据库表
-在 MySQL 服务中，点击 "Data" 标签
-运行以下 SQL 创建表：
-CREATE DATABASE IF NOT EXISTS railway;
-USE railway;
+# Filter-bot
+WALLET_6_PROXY_ADDRESS=0x31a15FbDA4870886160EF63359a78Cd98609F904
 
-CREATE TABLE portfolio_snapshots (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    timestamp DATETIME NOT NULL,
-    proxy_address VARCHAR(255) NOT NULL,
-    portfolio_total DECIMAL(20, 6) NOT NULL,
-    usdc_balance DECIMAL(20, 6) NOT NULL,
-    positions_value DECIMAL(20, 6) NOT NULL,
-    INDEX idx_timestamp (timestamp),
-    INDEX idx_proxy_address (proxy_address)
-);
-第四步：部署后端
-在同一个项目中，点击 "+ New" → "GitHub Repo"
-选择你的仓库
-Railway 会问你部署哪个目录，选择 portfolio-backend
-部署后，进入这个服务的 Settings：
-Root Directory: portfolio-backend
-进入 Variables 标签，添加：
-DATABASE_URL = 你之前复制的 MySQL URL
-还有你 .env 文件里的其他变量（钱包配置等）
-等待部署完成，点击服务会看到一个 URL，类似 https://xxx.railway.app，复制这个 URL
-第五步：部署前端
-再次点击 "+ New" → "GitHub Repo"
-选择同一个仓库
-选择目录 portfolio-frontend
-进入 Settings：
-Root Directory: portfolio-frontend
-进入 Variables 标签，添加：
-NEXT_PUBLIC_API_URL = 后端的 URL（第四步复制的那个）
-等待部署完成
-第六步：访问你的网站
-前端部署完成后，点击前端服务会看到一个 URL，打开就是你的网站了！
+# wallet 7
+WALLET_7_PROXY_ADDRESS=0x44F51741Acf126C8Aabb4C40d5d4fEEa890136dB
 
+# BTC-8-2x
+WALLET_8_PROXY_ADDRESS=0xb6987b61d408B6daF91aFC5ae590B89483CD3304
 
+WALLET_9_PROXY_ADDRESS=0x3eC9abd19C5Fa55727F3bf84d14a6099ce24D628
 
+WALLET_10_PROXY_ADDRESS=0x74DB7B9a70B2F749DcfF3Ca55D97C51A7c4953B5
 
-
-
-mysql://root:AbpwagxDrBYXvGccZNSdQwKiaBGMIgSZ@mysql.railway.internal:3306/railway
+WALLET_11_PROXY_ADDRESS=0x0c47663fd1a6840A832D4EE2f62E6CF71B598f87

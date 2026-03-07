@@ -4,9 +4,30 @@ use alloy::sol;
 use serde::{Deserialize, Serialize};
 use crate::error::AppError;
 
-const POLYGON_RPC: &str = "https://polygon-rpc.com";
+const POLYGON_RPC_PUBLIC: &str = "https://polygon-rpc.com";
 const USDC_ADDRESS: &str = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 const DATA_API_URL: &str = "https://data-api.polymarket.com";
+
+// 获取 RPC 端点列表（公共 + 备用）
+fn get_rpc_endpoints() -> Vec<String> {
+    let mut endpoints = vec![POLYGON_RPC_PUBLIC.to_string()];
+    
+    // Alchemy 备用
+    if let Ok(alchemy_key) = std::env::var("alchemy_API_Key") {
+        if !alchemy_key.is_empty() {
+            endpoints.push(format!("https://polygon-mainnet.g.alchemy.com/v2/{}", alchemy_key));
+        }
+    }
+    
+    // Infura 备用
+    if let Ok(infura_key) = std::env::var("Infura_API_KEY") {
+        if !infura_key.is_empty() {
+            endpoints.push(format!("https://polygon-mainnet.infura.io/v3/{}", infura_key));
+        }
+    }
+    
+    endpoints
+}
 
 sol! {
     #[sol(rpc)]
@@ -39,13 +60,14 @@ impl PortfolioService {
     }
 
     pub async fn fetch_portfolio(&self, proxy_address: &str) -> Result<PortfolioData, AppError> {
-        let (usdc_balance, positions_value) = tokio::join!(
+        let (usdc_result, positions_result) = tokio::join!(
             self.get_usdc_balance(proxy_address),
             self.get_positions_value(proxy_address)
         );
 
-        let usdc_balance = usdc_balance.unwrap_or(0.0);
-        let positions_value = positions_value.unwrap_or(0.0);
+        // USDC 余额获取失败时返回错误，让调用方处理兜底逻辑
+        let usdc_balance = usdc_result?;
+        let positions_value = positions_result.unwrap_or(0.0);
 
         Ok(PortfolioData {
             proxy_address: proxy_address.to_string(),
@@ -58,25 +80,38 @@ impl PortfolioService {
 
 
     async fn get_usdc_balance(&self, proxy_address: &str) -> Result<f64, AppError> {
-        let provider = ProviderBuilder::new()
-            .connect_http(POLYGON_RPC.parse().unwrap());
-
         let usdc_addr: Address = USDC_ADDRESS.parse()
             .map_err(|e| AppError::ParseError(format!("{}", e)))?;
         
         let wallet_addr: Address = proxy_address.parse()
             .map_err(|e| AppError::ParseError(format!("{}", e)))?;
 
-        let contract = IERC20::new(usdc_addr, &provider);
+        let endpoints = get_rpc_endpoints();
+        let mut last_error = None;
         
-        let result = contract.balanceOf(wallet_addr)
-            .call()
-            .await
-            .map_err(|e| AppError::RpcError(format!("{}", e)))?;
+        // 依次尝试每个 RPC 端点
+        for (idx, rpc_url) in endpoints.iter().enumerate() {
+            let provider = ProviderBuilder::new()
+                .connect_http(rpc_url.parse().unwrap());
 
-        // USDC有6位小数
-        let balance_f64 = result.to_string().parse::<f64>().unwrap_or(0.0) / 1_000_000.0;
-        Ok(balance_f64)
+            let contract = IERC20::new(usdc_addr, &provider);
+            
+            match contract.balanceOf(wallet_addr).call().await {
+                Ok(result) => {
+                    let balance_f64 = result.to_string().parse::<f64>().unwrap_or(0.0) / 1_000_000.0;
+                    if idx > 0 {
+                        tracing::info!("使用备用 RPC {} 成功获取 USDC 余额", idx);
+                    }
+                    return Ok(balance_f64);
+                }
+                Err(e) => {
+                    tracing::warn!("RPC {} 获取 USDC 余额失败: {}", idx, e);
+                    last_error = Some(e);
+                }
+            }
+        }
+
+        Err(AppError::RpcError(format!("所有 RPC 端点都失败: {:?}", last_error)))
     }
 
     async fn get_positions_value(&self, proxy_address: &str) -> Result<f64, AppError> {
